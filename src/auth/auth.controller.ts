@@ -1,36 +1,45 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  Body,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { apiResponse } from 'src/helpers/enums/api-response.enum';
+import { Public } from 'src/helpers/decorators/is-public.decorator';
+import { UserSigninDto } from './dto/user-sign-in.dto';
+import { AuthResponseDto } from './dto/auth-response.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.authService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @ApiOperation({
+    description: 'SignIn user',
+  })
+  @ApiNotFoundResponse({
+    description: apiResponse.NOT_FOUND,
+    type: NotFoundException,
+  })
+  @ApiBadRequestResponse({
+    description: apiResponse.BAD_REQUEST,
+  })
+  @ApiUnauthorizedResponse({
+    description: apiResponse.UNAUTHORIZED,
+    type: UnauthorizedException,
+  })
+  @Public()
+  @Post('login')
+  signIn(@Body() userSigninDto: UserSigninDto): Promise<AuthResponseDto> {
+    return this.authService.signIn(userSigninDto);
   }
 }

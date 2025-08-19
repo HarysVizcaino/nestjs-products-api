@@ -93,6 +93,10 @@ export class UsersService {
     };
   }
 
+  async findUserByEmail(email: string): Promise<User> {
+    return this.userRepository.findUserByEmail(email);
+  }
+
   async remove(id: string): Promise<void> {
     await this.userRepository.deleteUser(id);
   }

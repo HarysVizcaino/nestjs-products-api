@@ -20,5 +20,6 @@ import { APP_GUARD } from '@nestjs/core';
     HashHelper,
   ],
   imports: [TypeOrmModule.forFeature([User])],
+  exports: [UsersService, UserRepository, HashHelper],
 })
 export class UsersModule {}

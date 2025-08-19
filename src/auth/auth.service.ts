@@ -1,26 +1,44 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+
+import { UsersService } from 'src/users/users.service';
+import { JwtService } from '@nestjs/jwt';
+import { AuthResponseDto } from './dto/auth-response.dto';
+import { UserSigninDto } from './dto/user-sign-in.dto';
+import { HashHelper } from 'src/helpers/hashing-helpers';
+import { isEmpty } from 'class-validator';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
-  }
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService,
+    private hashHelper: HashHelper,
+  ) {}
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+  async signIn(userSigninDto: UserSigninDto): Promise<AuthResponseDto> {
+    const user = await this.usersService.findUserByEmail(userSigninDto.email);
+    if (isEmpty(user)) {
+      throw new UnauthorizedException('Invalid username or password');
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+    const isPasswordValid = await this.hashHelper.comparePassword(
+      userSigninDto.password,
+      user.password,
+    );
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid username or password');
+    }
+    const payload = {
+      sub: user.id,
+      username: user.email,
+    };
+    const token = await this.jwtService.signAsync(payload);
+    return new AuthResponseDto(token, {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    });
   }
 }
