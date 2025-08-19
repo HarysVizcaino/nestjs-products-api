@@ -8,6 +8,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ContentfulModule } from './contentful/contentful.module';
 import { ReportsModule } from './reports/reports.module';
 import { ProductsModule } from './products/products.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ProductsModule } from './products/products.module';
     ContentfulModule,
     ReportsModule,
     ProductsModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

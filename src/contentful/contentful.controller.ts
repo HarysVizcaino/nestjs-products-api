@@ -1,8 +1,10 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { ContentfulService } from './contentful.service';
 import { CreateContentfulDto } from './dto/create-contentful.dto';
 import { UpdateContentfulDto } from './dto/update-contentful.dto';
 
+@ApiTags('Contentful')
 @Controller('contentful')
 export class ContentfulController {
   constructor(private readonly contentfulService: ContentfulService) {}

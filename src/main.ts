@@ -9,6 +9,11 @@ async function bootstrap() {
     .setTitle('Products API')
     .setDescription('Product management API with Contentful integration')
     .setVersion('1.0')
+    .addTag('Users', 'User management and authentication')
+    .addTag('Products', 'Product catalog management')
+    .addTag('Auth', 'Authentication endpoints')
+    .addTag('Contentful', 'Contentful CMS integration')
+    .addTag('Reports', 'Analytics and reporting')
     .addBearerAuth()
     .build();
 
