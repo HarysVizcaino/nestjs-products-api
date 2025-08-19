@@ -5,6 +5,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ContentfulModule } from './contentful/contentful.module';
+import { ReportsModule } from './reports/reports.module';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -23,6 +26,9 @@ import { ScheduleModule } from '@nestjs/schedule';
     }),
     ScheduleModule.forRoot(),
     AuthModule,
+    ContentfulModule,
+    ReportsModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
