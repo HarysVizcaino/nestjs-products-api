@@ -6,33 +6,51 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: products_db
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD-SHELL", "pg_isready -U postgres -d products_db || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
 
   api:
     build: .
     ports:
-      - '3000:3000'
+      - "3000:3000"
     environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=products_db
-      - NODE_ENV=development
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: products_db
+
+      # App
+      NODE_ENV: development
+      PORT: 3000
+
+      # JWT
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      JWT_EXPIRES_IN: 7d
+
+      # Contentful
+      CONTENTFUL_SPACE_ID: 9xs1613l9f7v
+      CONTENTFUL_ACCESS_TOKEN: I-ThsT55eE_B3sCUWEQyDT4VqVO3x__20ufuie9usns
+      CONTENTFUL_ENVIRONMENT: master
+      CONTENTFUL_CONTENT_TYPE: product
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     volumes:
       - .:/app
-      - /app/node_modules
-    command: npm run start:dev
+      - node_modules:/app/node_modules
+    working_dir: /app
+    # 👇 Sobrescribe el CMD por defecto del Dockerfile (start:prod) para dev:
+    command: ["npm", "run", "start:dev"]
+    restart: unless-stopped
 
 volumes:
   postgres_data:
+  node_modules:

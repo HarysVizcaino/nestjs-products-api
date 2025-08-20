@@ -83,7 +83,13 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!**/*.module.ts",
+      "!**/*.entity.ts",
+      "!**/*.dto.ts",
+      "!**/*.repository.ts",
+      "!**/*.guard.ts",
+      "!**/*.strategy.ts"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
@@ -92,6 +98,7 @@
     },
     "modulePaths": [
       "<rootDir>"
-    ]
+    ],
+    "collectCoverage": true
   }
 }
