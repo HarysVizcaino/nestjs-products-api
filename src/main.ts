@@ -21,8 +21,12 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  const seedService = app.get(SeedService);
-  await seedService.seed();
+  try {
+    const seedService = app.get(SeedService);
+    await seedService.seed();
+  } catch (error) {
+    console.error('Error seeding database', error);
+  }
 
   await app.listen(3000);
   console.log(`Application is running on: ${await app.getUrl()}`);

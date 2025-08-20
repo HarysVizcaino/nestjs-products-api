@@ -118,7 +118,7 @@ Create a `.env` file in the root directory:
 
 ```env
 # Database Configuration
-DB_HOST=localhost
+DB_HOST=postgres
 DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=postgres
