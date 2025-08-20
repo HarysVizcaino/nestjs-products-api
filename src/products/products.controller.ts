@@ -1,36 +1,92 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Query,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { ProductsService } from './products.service';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { FilterProductDto } from './dto/filter-product.dto';
+import { PaginationRequestDto } from 'src/commons/dto/pagination-request.dto';
+import { PaginatedResponseDto } from 'src/commons/dto/paginated-response.dto';
+import { ProductResponseDto } from './dto/product-response.dto';
+import { roleEnum } from 'src/helpers/enums/roles.enum';
+import { apiResponse } from 'src/helpers/enums/api-response.enum';
+import { AuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @ApiTags('Products')
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
-  }
-
+  @ApiOperation({
+    description: `List of products with pagination.
+    <br><br/>
+    Allowed Roles: [
+    ${roleEnum.ADMIN}
+    ]
+    `,
+  })
+  @ApiOkResponse({
+    description: apiResponse.OK,
+    type: [ProductResponseDto],
+  })
+  @ApiBadRequestResponse({
+    description: apiResponse.BAD_REQUEST,
+  })
+  @ApiUnauthorizedResponse({
+    description: apiResponse.UNAUTHORIZED,
+    type: UnauthorizedException,
+  })
+  @UseGuards(AuthGuard)
   @Get()
-  findAll() {
-    return this.productsService.findAll();
+  findAll(
+    @Query() paginationDto: PaginationRequestDto,
+    @Query() filterDto: FilterProductDto,
+  ): Promise<PaginatedResponseDto<ProductResponseDto>> {
+    return this.productsService.findAll(paginationDto, filterDto);
   }
 
+  @ApiOperation({
+    description: `Get product by Id.
+    <br><br/>
+    Allowed Roles: [
+    ${roleEnum.ADMIN}
+    ]
+    `,
+  })
+  @ApiOkResponse({
+    description: apiResponse.OK,
+    type: ProductResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: apiResponse.BAD_REQUEST,
+  })
+  @ApiUnauthorizedResponse({
+    description: apiResponse.UNAUTHORIZED,
+    type: UnauthorizedException,
+  })
+  @ApiNotFoundResponse({
+    description: apiResponse.NOT_FOUND,
+    type: NotFoundException,
+  })
+  @UseGuards(AuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productsService.update(+id, updateProductDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productsService.remove(+id);
+  findOne(@Param('id') id: string): Promise<ProductResponseDto> {
+    if (!id) {
+      throw new BadRequestException('ID must be a positive integer');
+    }
+    return this.productsService.findOne(id);
   }
 }

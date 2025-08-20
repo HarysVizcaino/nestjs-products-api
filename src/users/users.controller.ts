@@ -26,7 +26,7 @@ import { roleEnum } from 'src/helpers/enums/roles.enum';
 import { apiResponse } from 'src/helpers/enums/api-response.enum';
 import { AuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Public } from 'src/helpers/decorators/is-public.decorator';
-import { PaginatedResponseDto } from 'src/commons/dto/pagination-response.dto';
+import { PaginatedResponseDto } from 'src/commons/dto/paginated-response.dto';
 
 @ApiTags('Users')
 @Controller('users')

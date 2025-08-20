@@ -7,6 +7,7 @@ export class PaginationRequestDto {
     description: 'which page of data are you requesting',
     required: false,
     minimum: 1,
+    example: 1,
   })
   @IsInt()
   @IsOptional()
@@ -22,5 +23,5 @@ export class PaginationRequestDto {
   @IsInt()
   @IsOptional()
   @IsPositive()
-  limit?: number = 10;
+  limit?: number = 5;
 }

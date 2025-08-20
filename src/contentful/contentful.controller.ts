@@ -1,36 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ContentfulService } from './contentful.service';
-import { CreateContentfulDto } from './dto/create-contentful.dto';
-import { UpdateContentfulDto } from './dto/update-contentful.dto';
+import { Public } from 'src/helpers/decorators/is-public.decorator';
 
 @ApiTags('Contentful')
 @Controller('contentful')
 export class ContentfulController {
   constructor(private readonly contentfulService: ContentfulService) {}
 
-  @Post()
-  create(@Body() createContentfulDto: CreateContentfulDto) {
-    return this.contentfulService.create(createContentfulDto);
+  @Get('sync')
+  syncProducts() {
+    return this.contentfulService.syncProducts();
   }
 
-  @Get()
-  findAll() {
-    return this.contentfulService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.contentfulService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateContentfulDto: UpdateContentfulDto) {
-    return this.contentfulService.update(+id, updateContentfulDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.contentfulService.remove(+id);
+  @Post('manual-sync')
+  @Public()
+  manualSync() {
+    return this.contentfulService.manualSync();
   }
 }

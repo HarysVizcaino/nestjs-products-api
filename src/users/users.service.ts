@@ -9,7 +9,7 @@ import { UserRepository } from './users.repository';
 import { User } from './entities/user.entity';
 import { UserResponseDto } from './dto/user-response.dto';
 import { HashHelper } from 'src/helpers/hashing-helpers';
-import { PaginatedResponseDto } from 'src/commons/dto/pagination-response.dto';
+import { PaginatedResponseDto } from 'src/commons/dto/paginated-response.dto';
 
 @Injectable()
 export class UsersService {
@@ -48,15 +48,17 @@ export class UsersService {
 
   async findAll(): Promise<PaginatedResponseDto<UserResponseDto>> {
     const users = await this.userRepository.findAllUsers();
-    return {
-      data: users.map((user) => ({
+    return new PaginatedResponseDto(
+      users.map((user) => ({
         id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
       })),
-      total: users.length,
-    };
+      users.length,
+      1,
+      users.length,
+    );
   }
 
   async findOne(id: string): Promise<UserResponseDto> {
