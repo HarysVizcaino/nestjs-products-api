@@ -1,5 +1,11 @@
 # Product Management API with Contentful Integration
 
+[![CI/CD Pipeline](https://github.com/HarysVizcaino/nestjs-products-api/actions/workflows/ci.yml/badge.svg)](https://github.com/HarysVizcaino/nestjs-products-api/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/HarysVizcaino/nestjs-products-api/branch/main/graph/badge.svg)](https://codecov.io/gh/HarysVizcaino/nestjs-products-api)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.1.3-blue.svg)](https://www.typescriptlang.org/)
+[![NestJS](https://img.shields.io/badge/NestJS-10.x-red.svg)](https://nestjs.com/)
+
 A robust NestJS-based REST API for product management with Contentful CMS integration, featuring authentication, reporting, and automated data synchronization.
 
 ## 🚀 Features
