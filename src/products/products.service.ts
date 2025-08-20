@@ -77,4 +77,8 @@ export class ProductsService {
       description: product.description,
     };
   }
+
+  async remove(id: string): Promise<void> {
+    await this.productsRepository.remove(id);
+  }
 }

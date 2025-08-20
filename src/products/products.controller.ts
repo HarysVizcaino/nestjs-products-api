@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
@@ -88,5 +89,40 @@ export class ProductsController {
       throw new BadRequestException('ID must be a positive integer');
     }
     return this.productsService.findOne(id);
+  }
+
+  @ApiOperation({
+    description: `Delete product by Id.
+    <br><br/>
+    Allowed Roles: [
+    ${roleEnum.ADMIN}
+    ]
+    `,
+  })
+  @ApiOkResponse({
+    description: apiResponse.DELETED,
+  })
+  @ApiBadRequestResponse({
+    description: apiResponse.BAD_REQUEST,
+  })
+  @ApiUnauthorizedResponse({
+    description: apiResponse.UNAUTHORIZED,
+    type: UnauthorizedException,
+  })
+  @ApiNotFoundResponse({
+    description: apiResponse.NOT_FOUND,
+    type: NotFoundException,
+  })
+  @UseGuards(AuthGuard)
+  @Delete(':id')
+  async remove(@Param('id') id: string): Promise<{ message: string }> {
+    if (!id) {
+      throw new BadRequestException('ID must be a positive integer');
+    }
+    await this.productsService.remove(id);
+
+    return {
+      message: apiResponse.DELETED,
+    };
   }
 }

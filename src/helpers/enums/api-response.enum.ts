@@ -4,4 +4,5 @@ export enum apiResponse {
   NOT_FOUND = 'Record Not Found',
   BAD_REQUEST = 'Malformed data and/or validation errors',
   UNAUTHORIZED = 'Invalid Authorization',
+  DELETED = 'Record deleted successfully',
 }
