@@ -4,9 +4,19 @@ import { ContentfulService } from './contentful.service';
 describe('ContentfulService', () => {
   let service: ContentfulService;
 
+  const mockContentfulService = {
+    getContentfulData: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ContentfulService],
+      providers: [
+        ContentfulService,
+        {
+          provide: ContentfulService,
+          useValue: mockContentfulService,
+        },
+      ],
     }).compile();
 
     service = module.get<ContentfulService>(ContentfulService);
