@@ -1,0 +1,262 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '18'
+  COVERAGE_THRESHOLD: 30
+
+jobs:
+  # Code Quality Checks
+  lint-and-format:
+    name: 🔍 Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📋 Install dependencies
+        run: npm ci
+
+      - name: 🔍 Run ESLint
+        run: npm run lint
+
+      - name: 💅 Check code formatting
+        run: npx prettier --check "src/**/*.ts" "test/**/*.ts"
+
+      - name: 🏗️ Check TypeScript compilation
+        run: npm run build
+
+  # Unit and Integration Tests
+  test:
+    name: 🧪 Tests
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18, 20]
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: 📋 Install dependencies
+        run: npm ci
+
+      - name: 🧪 Run unit tests with coverage
+        run: npm run test:cov
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: test_db
+          NODE_ENV: test
+          JWT_SECRET: test-secret-key-for-ci
+          JWT_EXPIRES_IN: 1h
+
+      - name: 📊 Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+      - name: 📈 Coverage Report
+        run: |
+          echo "## Test Coverage Report 📊" >> $GITHUB_STEP_SUMMARY
+          npm run test:cov | tail -n 10 >> $GITHUB_STEP_SUMMARY
+
+  # End-to-End Tests
+  e2e-tests:
+    name: 🔄 E2E Tests
+    runs-on: ubuntu-latest
+    needs: [lint-and-format]
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: products_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📋 Install dependencies
+        run: npm ci
+
+      - name: 🏗️ Build application
+        run: npm run build
+
+      - name: 🚀 Start application (background)
+        run: |
+          npm run start:prod &
+          sleep 10
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: products_db
+          NODE_ENV: production
+          JWT_SECRET: test-secret-key-for-e2e
+          PORT: 3000
+
+      - name: 🔄 Run E2E tests
+        run: npm run test:e2e
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: products_db
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: pkill -f "node dist/main" || true
+
+  # Security Audit
+  security:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📋 Install dependencies
+        run: npm ci
+
+      - name: 🔍 Run security audit
+        run: npm audit --audit-level moderate
+
+      - name: 🔒 Run additional security checks
+        run: |
+          echo "Checking for sensitive files..."
+          if find . -name "*.env" -not -path "./node_modules/*" | grep -q .; then
+            echo "❌ Found .env files in repository!"
+            exit 1
+          fi
+          echo "✅ No sensitive files found"
+
+  # Build Verification
+  build:
+    name: 🏗️ Build Verification
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, test]
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📋 Install dependencies
+        run: npm ci
+
+      - name: 🏗️ Build for production
+        run: npm run build
+
+      - name: 📦 Verify build artifacts
+        run: |
+          echo "Checking build output..."
+          ls -la dist/
+          if [ ! -f "dist/main.js" ]; then
+            echo "❌ Main build file not found!"
+            exit 1
+          fi
+          echo "✅ Build verification successful"
+
+      - name: 📤 Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist/
+          retention-days: 7
+
+  # Docker Build Test
+  docker:
+    name: 🐳 Docker Build
+    runs-on: ubuntu-latest
+    needs: [lint-and-format]
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🏗️ Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: api-contentful:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: 🧪 Test Docker image
+        run: |
+          echo "Testing Docker image..."
+          docker run --rm api-contentful:test node --version
+          echo "✅ Docker image test passed"
