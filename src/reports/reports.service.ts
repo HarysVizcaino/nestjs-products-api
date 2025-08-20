@@ -1,26 +1,39 @@
 import { Injectable } from '@nestjs/common';
-import { CreateReportDto } from './dto/create-report.dto';
-import { UpdateReportDto } from './dto/update-report.dto';
+import { ReportsRepository } from './reports.repository';
 
 @Injectable()
 export class ReportsService {
-  create(createReportDto: CreateReportDto) {
-    return 'This action adds a new report';
+  constructor(private readonly reportsRepository: ReportsRepository) {}
+
+  async getDeletedProductsPercentage() {
+    return this.reportsRepository.getDeletedProductsPercentage();
   }
 
-  findAll() {
-    return `This action returns all reports`;
+  async getNonDeletedProductsStats(
+    withPrice?: boolean,
+    startDate?: Date,
+    endDate?: Date,
+  ) {
+    return this.reportsRepository.getNonDeletedProductsStats(
+      withPrice,
+      startDate,
+      endDate,
+    );
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} report`;
+  async getCategoryDistribution() {
+    return this.reportsRepository.getCategoryDistribution();
   }
 
-  update(id: number, updateReportDto: UpdateReportDto) {
-    return `This action updates a #${id} report`;
+  async getPriceRangeDistribution() {
+    return this.reportsRepository.getPriceRangeDistribution();
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} report`;
+  async getProductsByMonth() {
+    return this.reportsRepository.getProductsByMonth();
+  }
+
+  async getTopCategories() {
+    return this.reportsRepository.getTopCategories();
   }
 }
