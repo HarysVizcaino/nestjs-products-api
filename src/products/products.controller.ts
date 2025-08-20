@@ -7,7 +7,6 @@ import {
   Param,
   Query,
   UnauthorizedException,
-  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -24,7 +23,7 @@ import { PaginatedResponseDto } from 'src/commons/dto/paginated-response.dto';
 import { ProductResponseDto } from './dto/product-response.dto';
 import { roleEnum } from 'src/helpers/enums/roles.enum';
 import { apiResponse } from 'src/helpers/enums/api-response.enum';
-import { AuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Public } from 'src/helpers/decorators/is-public.decorator';
 
 @ApiTags('Products')
 @Controller('products')
@@ -46,11 +45,7 @@ export class ProductsController {
   @ApiBadRequestResponse({
     description: apiResponse.BAD_REQUEST,
   })
-  @ApiUnauthorizedResponse({
-    description: apiResponse.UNAUTHORIZED,
-    type: UnauthorizedException,
-  })
-  @UseGuards(AuthGuard)
+  @Public()
   @Get()
   findAll(
     @Query() paginationDto: PaginationRequestDto,
@@ -82,7 +77,7 @@ export class ProductsController {
     description: apiResponse.NOT_FOUND,
     type: NotFoundException,
   })
-  @UseGuards(AuthGuard)
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string): Promise<ProductResponseDto> {
     if (!id) {
@@ -113,7 +108,7 @@ export class ProductsController {
     description: apiResponse.NOT_FOUND,
     type: NotFoundException,
   })
-  @UseGuards(AuthGuard)
+  @Public()
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<{ message: string }> {
     if (!id) {

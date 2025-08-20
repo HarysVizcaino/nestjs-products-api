@@ -1,12 +1,4 @@
 export enum ProductCategory {
-  ELECTRONICS = 'electronics',
-  CLOTHING = 'clothing',
-  FOOD = 'food',
-  BOOKS = 'books',
-  HOME = 'home',
-  SPORTS = 'sports',
-  OTHER = 'other',
-  ALL = 'all',
   SMARTWATCH = 'smartwatch',
   SMARTPHONE = 'smartphone',
   LAPTOP = 'laptop',

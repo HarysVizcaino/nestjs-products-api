@@ -1,10 +1,13 @@
-import { Controller, Get, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ContentfulService } from './contentful.service';
 import { Public } from 'src/helpers/decorators/is-public.decorator';
+import { AuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @ApiTags('Contentful')
 @Controller('contentful')
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 export class ContentfulController {
   constructor(private readonly contentfulService: ContentfulService) {}
 

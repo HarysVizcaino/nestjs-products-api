@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -24,6 +25,7 @@ import { CustomReportQueryDto } from './dto/custom-report-query.dto';
 
 @ApiTags('Reports')
 @Controller('reports')
+@ApiBearerAuth()
 @UseGuards(AuthGuard)
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}

@@ -13,7 +13,8 @@ import { ProductCategory } from 'src/helpers/enums/product-category.enum';
 export class FilterProductDto {
   @ApiPropertyOptional({
     description: 'Filter by product id',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    required: false,
+    nullable: true,
   })
   @IsOptional()
   @IsUUID()
@@ -21,7 +22,8 @@ export class FilterProductDto {
 
   @ApiPropertyOptional({
     description: 'Filter by product name (partial match)',
-    example: 'iPhone',
+    required: false,
+    nullable: true,
   })
   @IsOptional()
   @IsString()
@@ -39,7 +41,6 @@ export class FilterProductDto {
 
   @ApiPropertyOptional({
     description: 'Minimum price filter',
-    example: 10.99,
     minimum: 0,
   })
   @Type(() => Number)
@@ -50,7 +51,6 @@ export class FilterProductDto {
 
   @ApiPropertyOptional({
     description: 'Maximum price filter',
-    example: 999.99,
     minimum: 0,
   })
   @Type(() => Number)
